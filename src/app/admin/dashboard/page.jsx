@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -37,6 +37,28 @@ export default function AdminDashboardHome() {
       color: "hsl(var(--chart-1))",
     },
   };
+
+  useEffect(() => {
+    // This is where you would fetch your data from the API
+    // and update the chartData state variable
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/products"); // Adjust the endpoint as needed
+        if (!response.ok) {
+          throw new Error("Failed to fetch quiz attempts");
+        }
+        const data = await response.json();
+        // Update chartData with fetched data
+        // setChartData(data);
+        console.log("Fetched products:", data);
+      } catch (error) {
+        console.error("Error fetching quiz attempts:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
