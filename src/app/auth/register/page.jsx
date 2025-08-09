@@ -16,7 +16,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { showSuccessToast } from "@/components/toasts";
+import { showErrorToast, showSuccessToast } from "@/components/toasts";
 import Link from "next/link";
 
 // Validation schema with Zod
@@ -46,34 +46,30 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (values) => {
+    console.log("Form submitted:", values);
     try {
-      // ✅ Save to localStorage (in a real app, you'd use an API)
-      const existingUsers =
-        JSON.parse(localStorage.getItem("quiz_users")) || [];
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-      // Check if email already exists
-      const isEmailTaken = existingUsers.some(
-        (user) => user.email === values.email
-      );
-      if (isEmailTaken) {
-        alert("Email already registered");
+      const data = await res.json();
+
+      if (!res.ok) {
+        showErrorToast(data.message || "Registration failed");
         return;
       }
 
-      const newUser = {
-        name: values.name,
-        email: values.email,
-        password: values.password,
-        role: "user",
-      };
-
-      localStorage.setItem(
-        "quiz_users",
-        JSON.stringify([...existingUsers, newUser])
-      );
-
-      showSuccessToast("Registered successfully!");
-      router.push("/auth/login");
+      if (res.ok) {
+        showSuccessToast(data.message || "Registration successful");
+        // Redirect based on role
+        if (data.user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/user/dashboard");
+        }
+      }
     } catch (err) {
       console.error("Registration failed:", err);
       showErrorToast("Registration failed. Please try again.");

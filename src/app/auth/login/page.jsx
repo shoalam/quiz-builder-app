@@ -36,26 +36,31 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (values) => {
-    const savedUsers = JSON.parse(localStorage.getItem("quiz_users")) || [];
+  const onSubmit = async (values) => {
+    console.log("Form submitted:", values);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-    const matchedUser = savedUsers.find(
-      (user) => user.email === values.email && user.password === values.password
-    );
-
-    if (!matchedUser) {
-      showErrorToast("Invalid email or password");
-      return;
-    }
-
-    // ✅ Store logged-in user
-    localStorage.setItem("quiz_logged_user", JSON.stringify(matchedUser));
-    showSuccessToast("Logged in successfully!");
-    // ✅ Redirect based on role
-    if (matchedUser.role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/user/dashboard");
+      const data = await res.json();
+      console.log("Login response:", data);
+      if (!res.ok) {
+        showErrorToast(data.error || "Login failed");
+        return;
+      }
+      if (res.ok) {
+        if (data.user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/user/dashboard");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      showErrorToast(err?.message || "Login failed. Please try again.");
     }
   };
 

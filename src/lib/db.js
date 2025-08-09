@@ -13,8 +13,8 @@ export async function connectToDB() {
   try {
     await mongoose.connect(MONGODB_URI, {
       dbName: "quiz-builder", // replace with your DB name
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
     });
     console.log("MongoDB connected");
   } catch (err) {
